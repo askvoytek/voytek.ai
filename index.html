@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Voytek Kopcewicz — IT & Web3 Specialist</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0e14;
+      --bg2:       #0f1520;
+      --bg3:       #141c2b;
+      --accent:    #00e5ff;
+      --accent2:   #7b61ff;
+      --green:     #00ff9d;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --border:    #1e2d45;
+      --mono:      'Space Mono', monospace;
+      --sans:      'Syne', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Custom cursor */
+    .cursor {
+      width: 10px; height: 10px;
+      background: var(--green);
+      border-radius: 50%;
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s ease, width 0.2s ease, height 0.2s ease;
+      box-shadow: 0 0 8px var(--green), 0 0 20px rgba(0,255,157,0.5);
+      will-change: transform;
+    }
+    .cursor.hover {
+      width: 20px; height: 20px;
+    }
+    .cursor-ring {
+      width: 34px; height: 34px;
+      border: 1.5px solid var(--green);
+      border-radius: 50%;
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      opacity: 0.5;
+      animation: ringPulse 2s ease-in-out infinite;
+      will-change: transform;
+    }
+    @keyframes ringPulse {
+      0%, 100% { opacity: 0.5; scale: 1; }
+      50% { opacity: 0.2; scale: 1.2; }
+    }
+
+    /* Scanline overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.03) 2px,
+        rgba(0,0,0,0.03) 4px
+      );
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; width: 100%;
+      padding: 1.2rem 3rem;
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(10,14,20,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+    }
+    .nav-logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+    }
+    .nav-logo span { color: var(--muted); }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex; align-items: center;
+      padding: 8rem 3rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.3;
+      mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+    }
+    .hero-glow {
+      position: absolute;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(0,229,255,0.08) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .hero-content { position: relative; max-width: 900px; }
+    .hero-tag {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--green);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .hero-tag::before {
+      content: '';
+      width: 40px; height: 1px;
+      background: var(--green);
+    }
+    .hero h1 {
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      font-weight: 800;
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 .line1 { color: var(--text); display: block; }
+    .hero h1 .line2 {
+      display: block;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      color: var(--muted);
+      max-width: 560px;
+      line-height: 1.8;
+      margin-bottom: 2.5rem;
+    }
+    .hero-sub strong { color: var(--accent); font-weight: 400; }
+    .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn-primary {
+      padding: 0.85rem 2rem;
+      background: var(--accent);
+      color: var(--bg);
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: none; cursor: none;
+      transition: all 0.2s;
+      clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+    }
+    .btn-primary:hover { background: var(--green); transform: translateY(-2px); }
+    .btn-secondary {
+      padding: 0.85rem 2rem;
+      background: transparent;
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 1px solid var(--accent);
+      cursor: none;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover { background: rgba(0,229,255,0.08); transform: translateY(-2px); }
+
+    .hero-stats {
+      position: absolute; right: 3rem; top: 50%;
+      transform: translateY(-50%);
+      display: flex; flex-direction: column; gap: 2rem;
+    }
+    .stat {
+      text-align: right;
+      opacity: 0;
+      animation: fadeSlideIn 0.6s forwards;
+    }
+    .stat:nth-child(1) { animation-delay: 0.8s; }
+    .stat:nth-child(2) { animation-delay: 1s; }
+    .stat:nth-child(3) { animation-delay: 1.2s; }
+    .stat-num {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .stat-label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* SECTIONS */
+    section { padding: 6rem 3rem; }
+    .section-label {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--accent);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1; max-width: 60px; height: 1px;
+      background: var(--accent);
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 3rem;
+      color: var(--text);
+    }
+
+    /* ABOUT */
+    .about { background: var(--bg2); }
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+      max-width: 1200px;
+    }
+    .about-text p {
+      font-family: var(--mono);
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.9;
+      margin-bottom: 1.25rem;
+    }
+    .about-text p strong { color: var(--text); font-weight: 700; }
+    .about-text p .hl { color: var(--accent); }
+    .about-img-wrap {
+      position: relative;
+    }
+    .about-img-wrap img {
+      width: 100%;
+      border: 1px solid var(--border);
+      display: block;
+      filter: grayscale(20%) contrast(1.1);
+    }
+    .about-img-wrap::before {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border: 1px solid var(--accent2);
+      opacity: 0.3;
+      pointer-events: none;
+    }
+    .about-img-caption {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-top: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* SKILLS */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      max-width: 1200px;
+    }
+    .skill-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      padding: 1.75rem;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .skill-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s;
+    }
+    .skill-card:hover { border-color: var(--accent); transform: translateY(-4px); }
+    .skill-card:hover::before { transform: scaleX(1); }
+    .skill-icon {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .skill-card h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+    .skill-tags {
+      display: flex; flex-wrap: wrap; gap: 0.4rem;
+    }
+    .tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--accent);
+      background: rgba(0,229,255,0.08);
+      border: 1px solid rgba(0,229,255,0.2);
+      padding: 0.2rem 0.6rem;
+      letter-spacing: 0.05em;
+    }
+    .tag.purple {
+      color: var(--accent2);
+      background: rgba(123,97,255,0.08);
+      border-color: rgba(123,97,255,0.2);
+    }
+    .tag.green {
+      color: var(--green);
+      background: rgba(0,255,157,0.08);
+      border-color: rgba(0,255,157,0.2);
+    }
+
+    /* PROJECTS */
+    .projects { background: var(--bg2); }
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 1.5rem;
+      max-width: 1200px;
+    }
+    .project-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      transition: all 0.3s;
+      position: relative;
+    }
+    .project-card:hover { border-color: var(--accent2); transform: translateY(-4px); }
+    .project-num {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 0.2em;
+      margin-bottom: 1rem;
+    }
+    .project-card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+    }
+    .project-card p {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 1.25rem;
+    }
+    .project-stack { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+    /* EXPERIENCE */
+    .timeline { max-width: 800px; }
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 2rem;
+      margin-bottom: 3rem;
+      position: relative;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: 128px; top: 8px; bottom: -3rem;
+      width: 1px;
+      background: var(--border);
+    }
+    .timeline-item:last-child::before { display: none; }
+    .timeline-date {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-align: right;
+      padding-top: 0.2rem;
+      letter-spacing: 0.05em;
+    }
+    .timeline-dot {
+      position: absolute;
+      left: 121px; top: 6px;
+      width: 14px; height: 14px;
+      background: var(--accent);
+      border: 2px solid var(--bg);
+      border-radius: 50%;
+    }
+    .timeline-content h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.2rem;
+    }
+    .timeline-company {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+    .timeline-content p {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+    .timeline-content p strong { color: var(--green); }
+
+    /* CONTACT */
+    .contact { background: var(--bg2); text-align: center; }
+    .contact-inner { max-width: 600px; margin: 0 auto; }
+    .contact h2 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      margin-bottom: 1rem;
+    }
+    .contact p {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 2.5rem;
+    }
+    .contact-links { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+
+    /* FOOTER */
+    footer {
+      padding: 2rem 3rem;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    footer p {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+    footer span { color: var(--accent); }
+
+    /* ANIMATIONS */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); }
+
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      .hero { padding: 7rem 1.5rem 3rem; }
+      .hero-stats { display: none; }
+      section { padding: 4rem 1.5rem; }
+      .about-grid { grid-template-columns: 1fr; }
+      .timeline-item { grid-template-columns: 1fr; }
+      .timeline-item::before { display: none; }
+      .timeline-date { text-align: left; }
+      .timeline-dot { display: none; }
+      footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo"><span>~/</span>voytek.ai</div>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-content">
+      <div class="hero-tag">Remote · Hybrid · On-Site · Atlanta, GA</div>
+      <h1>
+        <span class="line1">Voytek</span>
+        <span class="line2">Kopcewicz</span>
+      </h1>
+      <p class="hero-sub">
+        <strong>IT Infrastructure</strong> · Networking · <strong>AI Automation</strong> · Web3 & DeFi · <strong>Help Desk & Support</strong><br/>
+        Building home labs, AI tools, blockchain scripts, and everything in between.
+      </p>
+      <div class="hero-btns">
+        <a href="#projects" class="btn-primary">View Projects</a>
+        <a href="#contact" class="btn-secondary">Get In Touch</a>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num">10+</div>
+        <div class="stat-label">Years IT Experience</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">5</div>
+        <div class="stat-label">Raspberry Pi's Running</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">∞</div>
+        <div class="stat-label">Things Left To Build</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about" id="about">
+    <div class="section-label">01 — About</div>
+    <h2 class="section-title">The Guy Behind The Lab</h2>
+    <div class="about-grid fade-up">
+      <div class="about-text">
+        <p>I'm an IT professional with a <strong>degree in Networking Administration</strong> and a career spanning help desk leadership, AV event production, and systems infrastructure. I've spent my life living and breathing computers — from building home labs to launching the <span class="hl">nation's first COVID-19 crisis call center</span> under pressure.</p>
+        <p>Recently I've been diving deep into <strong>Web Development</strong>, <strong>blockchain technology</strong>, and <strong>DeFi automation</strong> on the Sui network. My home lab runs a Pi 5 as a NAS and web server, Pi-hole for network-wide ad blocking, and a growing cluster of Raspberry Pis I break and fix daily — which is exactly how I learn.</p>
+        <p>I believe the best way to understand technology is to <span class="hl">build something, break it, and fix it yourself.</span> Every project teaches more than any tutorial ever could.</p>
+      </div>
+      <div class="about-img-wrap">
+        <img src="lab.jpg" alt="Voytek's home lab — Cisco rack, Raspberry Pi cluster, dual monitors" />
+        <p class="about-img-caption">// home lab — cisco rack · pi cluster · networking & crypto ops</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <div class="section-label">02 — Skills</div>
+    <h2 class="section-title">What I Work With</h2>
+    <div class="skills-grid">
+
+      <div class="skill-card fade-up">
+        <div class="skill-icon">🤖</div>
+        <h3>AI & Automation</h3>
+        <div class="skill-tags">
+          <span class="tag purple">Claude AI</span>
+          <span class="tag purple">Prompt Engineering</span>
+          <span class="tag purple">MCP / Agents</span>
+          <span class="tag purple">Python Automation</span>
+          <span class="tag purple">Claude Desktop</span>
+          <span class="tag purple">AI-Assisted Dev</span>
+        </div>
+      </div>
+
+      <div class="skill-card fade-up">
+        <div class="skill-icon">⛏️</div>
+        <h3>Crypto Mining</h3>
+        <div class="skill-tags">
+          <span class="tag green">Bitmain Antminer</span>
+          <span class="tag green">USB Moonlander</span>
+          <span class="tag green">Litecoin Mining</span>
+          <span class="tag green">Monero / XMR</span>
+          <span class="tag green">XMRig</span>
+          <span class="tag green">CGMiner</span>
+          <span class="tag green">Pi Mining Cluster</span>
+          <span class="tag green">Node Operation</span>
+          <span class="tag green">Hashrate Troubleshooting</span>
+        </div>
+      </div>
+
+      <div class="skill-card fade-up">
+        <div class="skill-icon">🌐</div>
+        <h3>Networking & Infrastructure</h3>
+        <div class="skill-tags">
+          <span class="tag">LAN / WAN</span>
+          <span class="tag">VPN</span>
+          <span class="tag">Firewall</span>
+          <span class="tag">DNS</span>
+          <span class="tag">Pi-hole</span>
+          <span class="tag">Samba NAS</span>
+          <span class="tag">TCP/IP</span>
+        </div>
+      </div>
+
+      <div class="skill-card fade-up">
+        <div class="skill-icon">🐧</div>
+        <h3>Linux & Systems</h3>
+        <div class="skill-tags">
+          <span class="tag">Ubuntu</span>
+          <span class="tag">Raspberry Pi OS</span>
+          <span class="tag">Bash</span>
+          <span class="tag">SSH</span>
+          <span class="tag">Nginx</span>
+          <span class="tag">Active Directory</span>
+          <span class="tag">Windows Server</span>
+        </div>
+      </div>
+
+      <div class="skill-card fade-up">
+        <div class="skill-icon">⚡</div>
+        <h3>Blockchain & Web3</h3>
+        <div class="skill-tags">
+          <span class="tag green">Ethereum</span>
+          <span class="tag green">BNB Smart Chain</span>
+          <span class="tag green">Sui Network</span>
+          <span class="tag green">Hedera / HBAR</span>
+          <span class="tag green">Tron / TRX</span>
+          <span class="tag green">PancakeSwap</span>
+          <span class="tag green">Aerodrome Finance</span>
+          <span class="tag green">DeFi</span>
+          <span class="tag green">Flash Loans</span>
+          <span class="tag green">Smart Contracts</span>
+        </div>
+      </div>
+
+      <div class="skill-card fade-up">
+        <div class="skill-icon">💻</div>
+        <h3>Development</h3>
+        <div class="skill-tags">
+          <span class="tag purple">HTML / CSS</span>
+          <span class="tag purple">JavaScript</span>
+          <span class="tag purple">TypeScript</span>
+          <span class="tag purple">Node.js</span>
+          <span class="tag purple">Python</span>
+          <span class="tag purple">Git</span>
+        </div>
+      </div>
+
+      <div class="skill-card fade-up">
+        <div class="skill-icon">☁️</div>
+        <h3>Cloud & Virtualisation</h3>
+        <div class="skill-tags">
+          <span class="tag">AWS</span>
+          <span class="tag">Azure</span>
+          <span class="tag">Docker</span>
+          <span class="tag">Kubernetes / k3s</span>
+          <span class="tag">VMware</span>
+        </div>
+      </div>
+
+      <div class="skill-card fade-up">
+        <div class="skill-icon">🔒</div>
+        <h3>Security & Support</h3>
+        <div class="skill-tags">
+          <span class="tag">Cybersecurity</span>
+          <span class="tag">Kali Linux</span>
+          <span class="tag">Pen Testing</span>
+          <span class="tag">Help Desk</span>
+          <span class="tag">Remote Support</span>
+          <span class="tag">Microsoft 365</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section class="projects" id="projects">
+    <div class="section-label">03 — Projects</div>
+    <h2 class="section-title">Things I've Built</h2>
+    <div class="projects-grid">
+
+      <div class="project-card fade-up">
+        <div class="project-num">PROJECT_01</div>
+        <h3>Sui Flash Loan Script</h3>
+        <p>Built and deployed a flash loan arbitrage script on the Sui blockchain using Scallop Protocol. Borrows SUI, executes arbitrage logic across DEXes (Cetus, Turbos), and repays within a single atomic transaction.</p>
+        <div class="project-stack">
+          <span class="tag green">TypeScript</span>
+          <span class="tag green">Sui Network</span>
+          <span class="tag green">Scallop SDK</span>
+          <span class="tag green">DeFi</span>
+        </div>
+      </div>
+
+      <div class="project-card fade-up">
+        <div class="project-num">PROJECT_02</div>
+        <h3>Raspberry Pi Home Lab</h3>
+        <p>Designed and built a multi-node home lab running Pi 5 as primary server with NAS (Samba), Pi-hole network ad blocking, Nginx web server, and a growing Pi cluster planned for Kubernetes (k3s).</p>
+        <div class="project-stack">
+          <span class="tag">Raspberry Pi</span>
+          <span class="tag">Ubuntu</span>
+          <span class="tag">Nginx</span>
+          <span class="tag">Pi-hole</span>
+          <span class="tag">Samba</span>
+        </div>
+      </div>
+
+      <div class="project-card fade-up">
+        <div class="project-num">PROJECT_03</div>
+        <h3>This Portfolio Website</h3>
+        <p>Designed and built from scratch using HTML, CSS and vanilla JavaScript. Hosted on a Raspberry Pi 5 running Nginx on my home network. No frameworks, no templates — written line by line as part of learning web development.</p>
+        <div class="project-stack">
+          <span class="tag purple">HTML</span>
+          <span class="tag purple">CSS</span>
+          <span class="tag purple">JavaScript</span>
+          <span class="tag">Nginx</span>
+          <span class="tag">Raspberry Pi</span>
+        </div>
+      </div>
+
+      <div class="project-card fade-up">
+        <div class="project-num">PROJECT_05</div>
+        <h3>AI-Powered Dev Workflow</h3>
+        <p>Built a local AI development environment using Claude Desktop with MCP tool integrations running via Docker on Windows 11. Uses AI agents to assist with coding, file management, research, and automation — turning solo projects into AI-assisted pipelines.</p>
+        <div class="project-stack">
+          <span class="tag purple">Claude AI</span>
+          <span class="tag purple">MCP Agents</span>
+          <span class="tag purple">Docker</span>
+          <span class="tag purple">Python</span>
+          <span class="tag">Windows 11</span>
+        </div>
+      </div>
+
+      <div class="project-card fade-up">
+        <div class="project-num">PROJECT_06</div>
+        <h3>Raspberry Pi Litecoin Mining Farm</h3>
+        <p>Built a networked Raspberry Pi 3 mining cluster using USB Moonlander ASICs. Configured open source mining software across multiple nodes, managed the network infrastructure, and optimized hashrate performance. Also deployed XMRig on a Pi to run a Monero node — just to see if it could be done. Also maintains and troubleshoots Bitmain Antminer ASIC miners.</p>
+        <div class="project-stack">
+          <span class="tag green">Raspberry Pi 3</span>
+          <span class="tag green">USB Moonlander</span>
+          <span class="tag green">Bitmain Antminer</span>
+          <span class="tag green">XMRig</span>
+          <span class="tag green">CGMiner</span>
+          <span class="tag green">Litecoin</span>
+          <span class="tag green">Monero</span>
+          <span class="tag">Linux</span>
+          <span class="tag">Networking</span>
+        </div>
+      </div>
+
+      <div class="project-card fade-up">
+        <div class="project-num">PROJECT_04</div>
+        <h3>COVID-19 Crisis Call Center</h3>
+        <p>Spearheaded the launch of the nation's first COVID-19 crisis call center at Inktel. Designed workflow, created training materials, and deployed the entire operation under extreme time pressure at the start of the pandemic.</p>
+        <div class="project-stack">
+          <span class="tag">Team Leadership</span>
+          <span class="tag">Crisis Management</span>
+          <span class="tag">Help Desk</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section id="experience">
+    <div class="section-label">04 — Experience</div>
+    <h2 class="section-title">Where I've Worked</h2>
+    <div class="timeline">
+
+      <div class="timeline-item fade-up">
+        <div class="timeline-date">Recent</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <h3>Remote IT Specialist</h3>
+          <div class="timeline-company">Self-Employed</div>
+          <p>Providing remote help desk support, network configuration, cybersecurity consulting, and system optimisation for businesses and individuals. Specialising in Linux administration, cloud solutions, and IT troubleshooting.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item fade-up">
+        <div class="timeline-date">Inktel</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <h3>Team Leader & Help Desk Support</h3>
+          <div class="timeline-company">Inktel Contact Center Solutions</div>
+          <p>Directed and mentored a team of support agents. Provided advanced troubleshooting for hardware, software, and network issues. Administered Active Directory for domain-level support. <strong>Launched the nation's first COVID-19 crisis call center.</strong></p>
+        </div>
+      </div>
+
+      <div class="timeline-item fade-up">
+        <div class="timeline-date">Marriott</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <h3>Audio Visual Supervisor</h3>
+          <div class="timeline-company">Marriott Hotel & Convention Center</div>
+          <p>Directed all AV operations for meetings, conferences, and large-scale events. Supervised and trained AV technicians. Managed inventory and collaborated with event planners to deliver tailored technology solutions.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item fade-up">
+        <div class="timeline-date">4cIT</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <h3>Technical Support Specialist</h3>
+          <div class="timeline-company">4cIT</div>
+          <p>Delivered technical support across hardware, software, and network environments. Handled escalations and maintained high customer satisfaction across diverse client environments.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact" id="contact">
+    <div class="contact-inner">
+      <div class="section-label" style="justify-content:center">05 — Contact</div>
+      <h2 class="section-title" style="margin-bottom:1rem">Let's Work Together</h2>
+      <p>Open to remote, hybrid, or on-site opportunities. Available for IT roles, Web3 development, AI automation projects, freelance work, and interesting conversations about tech, DeFi, and home labs.</p>
+      <div class="contact-links">
+        <a href="mailto:askvoytek@gmail.com" class="btn-primary">Send Email</a>
+        <a href="https://linkedin.com/in/voytekkop" class="btn-secondary" target="_blank">LinkedIn</a>
+        <a href="#" class="btn-secondary btn-disabled" style="opacity:0.35; cursor:not-allowed; pointer-events:none; border-style: dashed;">GitHub — Coming Soon</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 <span>Voytek Kopcewicz</span> — Built & hosted on a Raspberry Pi 5</p>
+    <p>Made with <span>HTML + CSS + JS</span> · Served by <span>Nginx</span></p>
+  </footer>
+
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    // Custom cursor
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    let mx = -100, my = -100, rx = -100, ry = -100;
+
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX;
+      my = e.clientY;
+      cursor.style.left = mx + 'px';
+      cursor.style.top  = my + 'px';
+    });
+
+    function animRing() {
+      rx += (mx - rx) * 0.12;
+      ry += (my - ry) * 0.12;
+      ring.style.left = rx + 'px';
+      ring.style.top  = ry + 'px';
+      requestAnimationFrame(animRing);
+    }
+    animRing();
+
+    document.querySelectorAll('a, button').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+    });
+
+    // Scroll fade-in
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), i * 100);
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  </script>
+</body>
+</html>
