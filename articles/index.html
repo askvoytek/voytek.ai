@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Articles — Voytek Kopcewicz</title>
+  <meta name="description" content="Field notes on building a 7-agent DeFi bot on a Raspberry Pi, privacy-first homelab builds, crypto mining, and everything in between." />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0e14;
+      --bg2:       #0f1520;
+      --bg3:       #141c2b;
+      --accent:    #00e5ff;
+      --accent2:   #7b61ff;
+      --green:     #00ff9d;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --border:    #1e2d45;
+      --mono:      'Space Mono', monospace;
+      --sans:      'Syne', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Custom cursor */
+    .cursor {
+      width: 10px; height: 10px;
+      background: var(--green);
+      border-radius: 50%;
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s ease, width 0.2s ease, height 0.2s ease;
+      box-shadow: 0 0 8px var(--green), 0 0 20px rgba(0,255,157,0.5);
+      will-change: transform;
+    }
+    .cursor.hover { width: 20px; height: 20px; }
+    .cursor-ring {
+      width: 34px; height: 34px;
+      border: 1.5px solid var(--green);
+      border-radius: 50%;
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      opacity: 0.5;
+      animation: ringPulse 2s ease-in-out infinite;
+      will-change: transform;
+    }
+    @keyframes ringPulse {
+      0%, 100% { opacity: 0.5; scale: 1; }
+      50% { opacity: 0.2; scale: 1.2; }
+    }
+
+    /* Scanline overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px
+      );
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; width: 100%;
+      padding: 1.2rem 3rem;
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(10,14,20,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+    }
+    .nav-logo { font-family: var(--mono); font-size: 0.85rem; color: var(--accent); letter-spacing: 0.1em; text-decoration: none; }
+    .nav-logo span { color: var(--muted); }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      font-family: var(--mono); font-size: 0.75rem; color: var(--muted);
+      text-decoration: none; letter-spacing: 0.1em; text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-links a.active { color: var(--green); }
+
+    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; }
+    .hamburger span { display: block; width: 24px; height: 2px; background: var(--accent); transition: all 0.3s ease; }
+    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+    /* PAGE HEADER */
+    .page-header {
+      min-height: 60vh;
+      display: flex; align-items: center;
+      padding: 9rem 3rem 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .page-header-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.3;
+      mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+    }
+    .page-header-content { position: relative; max-width: 900px; }
+    .page-tag {
+      font-family: var(--mono); font-size: 0.75rem; color: var(--green);
+      letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 1.5rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .page-tag::before { content: ''; width: 40px; height: 1px; background: var(--green); }
+    .page-header h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 800; line-height: 1; letter-spacing: -0.02em;
+      margin-bottom: 1.5rem;
+    }
+    .page-header h1 .hl {
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .page-header-sub {
+      font-family: var(--mono); font-size: 0.9rem; color: var(--muted);
+      max-width: 620px; line-height: 1.8; margin-bottom: 2rem;
+    }
+    .page-header-links { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn-primary, .btn-secondary {
+      padding: 0.8rem 1.75rem;
+      font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.1em;
+      text-transform: uppercase; text-decoration: none;
+      cursor: none; transition: all 0.2s; display: inline-block;
+    }
+    .btn-primary {
+      background: var(--accent); color: var(--bg); font-weight: 700; border: none;
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+    }
+    .btn-primary:hover { background: var(--green); transform: translateY(-2px); }
+    .btn-secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+    .btn-secondary:hover { background: rgba(0,229,255,0.08); transform: translateY(-2px); }
+
+    /* ARTICLES */
+    section { padding: 3rem 3rem 6rem; }
+    .section-label {
+      font-family: var(--mono); font-size: 0.7rem; color: var(--accent);
+      letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 0.75rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .section-label::after { content: ''; flex: 1; max-width: 60px; height: 1px; background: var(--accent); }
+    .section-title { font-size: clamp(1.6rem, 3.5vw, 2.2rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 2.5rem; color: var(--text); }
+
+    .articles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 1.5rem;
+      max-width: 1200px;
+    }
+    .article-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      transition: all 0.3s;
+      display: flex; flex-direction: column;
+      opacity: 0; transform: translateY(20px);
+    }
+    .article-card.visible { opacity: 1; transform: translateY(0); transition: opacity 0.5s ease, transform 0.5s ease; }
+    .article-card:hover { border-color: var(--accent2); transform: translateY(-4px); }
+    .article-card.visible:hover { transform: translateY(-4px); }
+    .article-date {
+      font-family: var(--mono); font-size: 0.65rem; color: var(--muted);
+      letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 1rem;
+    }
+    .article-card h3 { font-size: 1.05rem; font-weight: 700; color: var(--text); line-height: 1.4; margin-bottom: 0.75rem; }
+    .article-card h3 a { color: inherit; text-decoration: none; }
+    .article-card h3 a:hover { color: var(--accent); }
+    .article-card p { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); line-height: 1.8; margin-bottom: 1.25rem; flex-grow: 1; }
+    .article-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.25rem; }
+    .tag {
+      font-family: var(--mono); font-size: 0.65rem; color: var(--accent);
+      background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.2);
+      padding: 0.2rem 0.6rem; letter-spacing: 0.05em;
+    }
+    .tag.purple { color: var(--accent2); background: rgba(123,97,255,0.08); border-color: rgba(123,97,255,0.2); }
+    .tag.green { color: var(--green); background: rgba(0,255,157,0.08); border-color: rgba(0,255,157,0.2); }
+    .article-link {
+      font-family: var(--mono); font-size: 0.75rem; color: var(--accent);
+      text-decoration: none; letter-spacing: 0.05em; align-self: flex-start;
+    }
+    .article-link:hover { color: var(--green); }
+
+    /* FOLLOW STRIP */
+    .follow { background: var(--bg2); text-align: center; }
+    .follow-inner { max-width: 700px; margin: 0 auto; }
+    .follow p { font-family: var(--mono); font-size: 0.85rem; color: var(--muted); line-height: 1.8; margin-bottom: 2rem; }
+    .follow-links { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    footer {
+      padding: 2rem 3rem; border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      font-family: var(--mono); font-size: 0.7rem; color: var(--muted);
+    }
+    footer span { color: var(--accent); }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+
+    @media (max-width: 768px) {
+      .cursor, .cursor-ring { display: none; }
+      body { cursor: auto; }
+      .btn-primary, .btn-secondary { cursor: pointer; }
+      nav { padding: 1rem 1.5rem; }
+      .hamburger { display: flex; }
+      .nav-links {
+        display: none; position: fixed; top: 60px; left: 0; right: 0;
+        background: rgba(10,14,20,0.97); backdrop-filter: blur(12px);
+        flex-direction: column; padding: 2rem; gap: 1.5rem;
+        border-bottom: 1px solid var(--border); z-index: 99;
+      }
+      .nav-links.open { display: flex; }
+      .nav-links a { font-size: 1rem; }
+      .page-header { padding: 7rem 1.5rem 2rem; }
+      section { padding: 2rem 1.5rem 4rem; }
+      footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- NAV -->
+  <nav>
+    <a href="/" class="nav-logo"><span>~/</span>voytek.ai</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/#about" onclick="closeMenu()">About</a></li>
+      <li><a href="/#skills" onclick="closeMenu()">Skills</a></li>
+      <li><a href="/#projects" onclick="closeMenu()">Projects</a></li>
+      <li><a href="/#experience" onclick="closeMenu()">Experience</a></li>
+      <li><a href="/articles" class="active" onclick="closeMenu()">Articles</a></li>
+      <li><a href="/#contact" onclick="closeMenu()">Contact</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <section class="page-header">
+    <div class="page-header-grid"></div>
+    <div class="page-header-content">
+      <div class="page-tag">Writing · Field Notes</div>
+      <h1>Articles <span class="hl">&amp; Build Logs</span></h1>
+      <p class="page-header-sub">
+        Notes from the lab — building a 7-agent DeFi bot on a Raspberry Pi, privacy-first homelab rebuilds,
+        crypto mining, and whatever else breaks (and gets fixed) along the way. Published weekly on Substack.
+      </p>
+      <div class="page-header-links">
+        <a href="https://askvoytek.substack.com" class="btn-primary" target="_blank">Read on Substack</a>
+        <a href="/#contact" class="btn-secondary">Get In Touch</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARTICLES GRID -->
+  <section id="articles">
+    <div class="section-label">Latest</div>
+    <h2 class="section-title">Recent Posts</h2>
+    <div class="articles-grid">
+
+      <div class="article-card fade-up">
+        <div class="article-date">Jul 20, 2026</div>
+        <h3><a href="https://askvoytek.substack.com/p/camera-shy-one-take" target="_blank">Camera Shy, One Take!</a></h3>
+        <p>Building confidence one leap at a time — the things I never thought I'd do.</p>
+        <div class="article-tags"><span class="tag">Personal</span></div>
+        <a href="https://askvoytek.substack.com/p/camera-shy-one-take" class="article-link" target="_blank">Read on Substack →</a>
+      </div>
+
+      <div class="article-card fade-up">
+        <div class="article-date">Jul 16, 2026</div>
+        <h3><a href="https://askvoytek.substack.com/p/the-pi-5-privacy-build-the-actual" target="_blank">The Pi 5 Privacy Build: The Actual Reflash (Real Steps, Real Commands)</a></h3>
+        <p>The actual reflash: flashing Parrot OS Security edition on the Pi 5, first-boot cleanup, and how it's holding up so far.</p>
+        <div class="article-tags"><span class="tag purple">Homelab</span><span class="tag purple">Privacy</span></div>
+        <a href="https://askvoytek.substack.com/p/the-pi-5-privacy-build-the-actual" class="article-link" target="_blank">Read on Substack →</a>
+      </div>
+
+      <div class="article-card fade-up">
+        <div class="article-date">Jul 9, 2026</div>
+        <h3><a href="https://askvoytek.substack.com/p/new-build-turning-a-pi-5-into-a-privacy" target="_blank">New Build: Turning a Pi 5 Into a Privacy-First Machine</a></h3>
+        <p>Wiping Ubuntu Server for Parrot OS, and stress-testing what a Pi 5 can really handle — bugs, decisions, and dumb mistakes included.</p>
+        <div class="article-tags"><span class="tag purple">Homelab</span><span class="tag purple">Privacy</span></div>
+        <a href="https://askvoytek.substack.com/p/new-build-turning-a-pi-5-into-a-privacy" class="article-link" target="_blank">Read on Substack →</a>
+      </div>
+
+      <div class="article-card fade-up">
+        <div class="article-date">Jul 3, 2026</div>
+        <h3><a href="https://askvoytek.substack.com/p/agent-3-the-gap-scout-when-your-bot" target="_blank">Agent 3: The Gap Scout — When Your Bot Lies With a Straight Face</a></h3>
+        <p>Arb Series, Part 3 — the agent that almost cost me money by being too confident.</p>
+        <div class="article-tags"><span class="tag green">ARB NETWORK</span><span class="tag green">DeFi</span></div>
+        <a href="https://askvoytek.substack.com/p/agent-3-the-gap-scout-when-your-bot" class="article-link" target="_blank">Read on Substack →</a>
+      </div>
+
+      <div class="article-card fade-up">
+        <div class="article-date">Jun 29, 2026</div>
+        <h3><a href="https://askvoytek.substack.com/p/how-i-turned-my-most-frustrating" target="_blank">How I Turned My Most Frustrating Crypto Miners Into a Self-Healing System — 9 Years Later</a></h3>
+        <p>Five Moonlander 2 sticks running headless on a Raspberry Pi 3.</p>
+        <div class="article-tags"><span class="tag green">Mining</span><span class="tag purple">Homelab</span></div>
+        <a href="https://askvoytek.substack.com/p/how-i-turned-my-most-frustrating" class="article-link" target="_blank">Read on Substack →</a>
+      </div>
+
+      <div class="article-card fade-up">
+        <div class="article-date">Jun 26, 2026</div>
+        <h3><a href="https://askvoytek.substack.com/p/agent-2-the-yield-hunter-when-your" target="_blank">Agent 2: The Yield Hunter — When Your Bot Learns to Distrust Its Own Data</a></h3>
+        <p>Building the intelligence layer that decides where your money works harder — and learning DeFi's dark side the hard way.</p>
+        <div class="article-tags"><span class="tag green">ARB NETWORK</span><span class="tag green">DeFi</span></div>
+        <a href="https://askvoytek.substack.com/p/agent-2-the-yield-hunter-when-your" class="article-link" target="_blank">Read on Substack →</a>
+      </div>
+
+      <div class="article-card fade-up">
+        <div class="article-date">Jun 25, 2026</div>
+        <h3><a href="https://askvoytek.substack.com/p/ive-been-in-crypto-since-the-beginning" target="_blank">I've Been in Crypto Since the Beginning. It Took Me This Long to Build My Own Bot.</a></h3>
+        <p>How I built a 7-agent DeFi signal system on a Raspberry Pi — most people use $50,000 rigs. Mine cost $80.</p>
+        <div class="article-tags"><span class="tag green">ARB NETWORK</span><span class="tag green">DeFi</span></div>
+        <a href="https://askvoytek.substack.com/p/ive-been-in-crypto-since-the-beginning" class="article-link" target="_blank">Read on Substack →</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOLLOW -->
+  <section class="follow">
+    <div class="follow-inner">
+      <div class="section-label" style="justify-content:center">Stay In The Loop</div>
+      <h2 class="section-title" style="margin-bottom:1rem">New posts land weekly</h2>
+      <p>Subscribe on Substack for the full build logs, or catch cross-posts on Publish0x and X.</p>
+      <div class="follow-links">
+        <a href="https://askvoytek.substack.com" class="btn-primary" target="_blank">Subscribe on Substack</a>
+        <a href="https://publish0x.com" class="btn-secondary" target="_blank">Publish0x</a>
+        <a href="#" class="btn-secondary">X / Twitter</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 <span>Voytek Kopcewicz</span> — Built &amp; hosted on a Raspberry Pi 5</p>
+    <p><a href="/">← Back to Home</a></p>
+  </footer>
+
+  <script>
+    function toggleMenu() {
+      document.getElementById('hamburger').classList.toggle('open');
+      document.getElementById('navLinks').classList.toggle('open');
+    }
+    function closeMenu() {
+      document.getElementById('hamburger').classList.remove('open');
+      document.getElementById('navLinks').classList.remove('open');
+    }
+
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    let mx = -100, my = -100, rx = -100, ry = -100;
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+    });
+    function animRing() {
+      rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+      ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+      requestAnimationFrame(animRing);
+    }
+    animRing();
+    document.querySelectorAll('a, button').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+    });
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), i * 80);
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
