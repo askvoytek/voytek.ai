@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Links — Voytek Kopcewicz</title>
+  <meta name="description" content="Every Voytek.ai link in one place — Substack, X, YouTube, LinkedIn, Ko-fi, and more." />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0e14;
+      --bg2:       #0f1520;
+      --bg3:       #141c2b;
+      --accent:    #00e5ff;
+      --accent2:   #7b61ff;
+      --green:     #00ff9d;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --border:    #1e2d45;
+      --mono:      'Space Mono', monospace;
+      --sans:      'Syne', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Custom cursor */
+    .cursor {
+      width: 10px; height: 10px;
+      background: var(--green);
+      border-radius: 50%;
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s ease, width 0.2s ease, height 0.2s ease;
+      box-shadow: 0 0 8px var(--green), 0 0 20px rgba(0,255,157,0.5);
+      will-change: transform;
+    }
+    .cursor.hover { width: 20px; height: 20px; }
+    .cursor-ring {
+      width: 34px; height: 34px;
+      border: 1.5px solid var(--green);
+      border-radius: 50%;
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      opacity: 0.5;
+      animation: ringPulse 2s ease-in-out infinite;
+      will-change: transform;
+    }
+    @keyframes ringPulse {
+      0%, 100% { opacity: 0.5; scale: 1; }
+      50% { opacity: 0.2; scale: 1.2; }
+    }
+
+    /* Scanline overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px
+      );
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; width: 100%;
+      padding: 1.2rem 3rem;
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(10,14,20,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+    }
+    .nav-logo { font-family: var(--mono); font-size: 0.85rem; color: var(--accent); letter-spacing: 0.1em; text-decoration: none; }
+    .nav-logo span { color: var(--muted); }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      font-family: var(--mono); font-size: 0.75rem; color: var(--muted);
+      text-decoration: none; letter-spacing: 0.1em; text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-links a.active { color: var(--green); }
+
+    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; }
+    .hamburger span { display: block; width: 24px; height: 2px; background: var(--accent); transition: all 0.3s ease; }
+    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+    /* PAGE HEADER */
+    .page-header {
+      min-height: 40vh;
+      display: flex; align-items: center;
+      padding: 9rem 3rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .page-header-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.3;
+      mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+    }
+    .page-header-content { position: relative; max-width: 900px; margin: 0 auto; text-align: center; }
+    .page-tag {
+      font-family: var(--mono); font-size: 0.75rem; color: var(--green);
+      letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 1.5rem;
+      display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+    }
+    .page-tag::before, .page-tag::after { content: ''; width: 40px; height: 1px; background: var(--green); }
+    .page-header h1 {
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 800; line-height: 1; letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+    .page-header h1 .hl {
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .page-header-sub {
+      font-family: var(--mono); font-size: 0.85rem; color: var(--muted);
+      max-width: 560px; line-height: 1.8; margin: 0 auto;
+    }
+
+    /* LINKS LIST */
+    section { padding: 1rem 3rem 6rem; }
+    .links-wrap { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 0.85rem; }
+
+    .link-card {
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      padding: 1.1rem 1.5rem;
+      text-decoration: none;
+      color: var(--text);
+      transition: all 0.25s ease;
+      opacity: 0; transform: translateY(16px);
+    }
+    .link-card.visible { opacity: 1; transform: translateY(0); transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.2s, background 0.2s; }
+    .link-card:hover { border-color: var(--accent2); background: var(--bg3); transform: translateX(4px); }
+
+    .link-main { display: flex; flex-direction: column; gap: 0.2rem; }
+    .link-label {
+      font-family: var(--sans); font-weight: 700; font-size: 0.95rem; color: var(--text);
+    }
+    .link-handle {
+      font-family: var(--mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.03em;
+    }
+    .link-tag {
+      font-family: var(--mono); font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--bg); background: var(--green);
+      padding: 0.2rem 0.6rem; border-radius: 999px; white-space: nowrap;
+    }
+    .link-tag.accent { background: var(--accent); }
+
+    footer {
+      padding: 2rem 3rem; border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      font-family: var(--mono); font-size: 0.7rem; color: var(--muted);
+    }
+    footer span { color: var(--accent); }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+
+    @media (max-width: 768px) {
+      .cursor, .cursor-ring { display: none; }
+      body { cursor: auto; }
+      nav { padding: 1rem 1.5rem; }
+      .hamburger { display: flex; }
+      .nav-links {
+        display: none; position: fixed; top: 60px; left: 0; right: 0;
+        background: rgba(10,14,20,0.97); backdrop-filter: blur(12px);
+        flex-direction: column; padding: 2rem; gap: 1.5rem;
+        border-bottom: 1px solid var(--border); z-index: 99;
+      }
+      .nav-links.open { display: flex; }
+      .nav-links a { font-size: 1rem; }
+      .page-header { padding: 7rem 1.5rem 1.5rem; }
+      section { padding: 1rem 1.5rem 4rem; }
+      footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- NAV -->
+  <nav>
+    <a href="/" class="nav-logo"><span>~/</span>voytek.ai</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/#about" onclick="closeMenu()">About</a></li>
+      <li><a href="/#skills" onclick="closeMenu()">Skills</a></li>
+      <li><a href="/#projects" onclick="closeMenu()">Projects</a></li>
+      <li><a href="/#experience" onclick="closeMenu()">Experience</a></li>
+      <li><a href="/articles" onclick="closeMenu()">Articles</a></li>
+      <li><a href="/links" class="active" onclick="closeMenu()">Links</a></li>
+      <li><a href="/#contact" onclick="closeMenu()">Contact</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <section class="page-header">
+    <div class="page-header-grid"></div>
+    <div class="page-header-content">
+      <div class="page-tag">Everything, One Place</div>
+      <h1>Find Me <span class="hl">Everywhere</span></h1>
+      <p class="page-header-sub">
+        Substack, socials, and where to support the lab — all in one spot.
+      </p>
+    </div>
+  </section>
+
+  <!-- LINKS -->
+  <section id="links">
+    <div class="links-wrap">
+
+      <a class="link-card fade-up" href="https://askvoytek.substack.com" target="_blank" rel="noopener noreferrer">
+        <div class="link-main">
+          <span class="link-label">Substack</span>
+          <span class="link-handle">askvoytek.substack.com</span>
+        </div>
+        <span class="link-tag">Home Base</span>
+      </a>
+
+      <a class="link-card fade-up" href="https://x.com/askvoytek" target="_blank" rel="noopener noreferrer">
+        <div class="link-main">
+          <span class="link-label">X</span>
+          <span class="link-handle">@askvoytek</span>
+        </div>
+      </a>
+
+      <a class="link-card fade-up" href="https://youtube.com/@askvoytek" target="_blank" rel="noopener noreferrer">
+        <div class="link-main">
+          <span class="link-label">YouTube</span>
+          <span class="link-handle">Voytek AI</span>
+        </div>
+      </a>
+
+      <a class="link-card fade-up" href="https://linkedin.com/in/voytekkop" target="_blank" rel="noopener noreferrer">
+        <div class="link-main">
+          <span class="link-label">LinkedIn</span>
+          <span class="link-handle">voytekkop</span>
+        </div>
+      </a>
+
+      <a class="link-card fade-up" href="https://instagram.com/askvoytek" target="_blank" rel="noopener noreferrer">
+        <div class="link-main">
+          <span class="link-label">Instagram</span>
+          <span class="link-handle">@askvoytek</span>
+        </div>
+      </a>
+
+      <a class="link-card fade-up" href="https://dev.to/askvoytek" target="_blank" rel="noopener noreferrer">
+        <div class="link-main">
+          <span class="link-label">DEV.to</span>
+          <span class="link-handle">askvoytek</span>
+        </div>
+      </a>
+
+      <a class="link-card fade-up" href="https://reddit.com/u/askvoytek" target="_blank" rel="noopener noreferrer">
+        <div class="link-main">
+          <span class="link-label">Reddit</span>
+          <span class="link-handle">u/askvoytek</span>
+        </div>
+      </a>
+
+      <a class="link-card fade-up" href="https://threads.net/@askvoytek" target="_blank" rel="noopener noreferrer">
+        <div class="link-main">
+          <span class="link-label">Threads</span>
+          <span class="link-handle">@askvoytek</span>
+        </div>
+      </a>
+
+      <a class="link-card fade-up" href="https://medium.com/@askvoytek" target="_blank" rel="noopener noreferrer">
+        <div class="link-main">
+          <span class="link-label">Medium</span>
+          <span class="link-handle">@askvoytek</span>
+        </div>
+      </a>
+
+      <a class="link-card fade-up" href="https://publish0x.com/@askvoytek" target="_blank" rel="noopener noreferrer">
+        <div class="link-main">
+          <span class="link-label">Publish0x</span>
+          <span class="link-handle">askvoytek</span>
+        </div>
+      </a>
+
+      <a class="link-card fade-up" href="https://github.com/askvoytek" target="_blank" rel="noopener noreferrer">
+        <div class="link-main">
+          <span class="link-label">GitHub</span>
+          <span class="link-handle">askvoytek</span>
+        </div>
+      </a>
+
+      <a class="link-card fade-up" href="https://ko-fi.com/askvoytek" target="_blank" rel="noopener noreferrer">
+        <div class="link-main">
+          <span class="link-label">Ko-fi</span>
+          <span class="link-handle">Fuel the Lab</span>
+        </div>
+        <span class="link-tag accent">Support</span>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 <span>Voytek Kopcewicz</span> — Built &amp; hosted on a Raspberry Pi 5</p>
+    <p><a href="/">← Back to Home</a></p>
+  </footer>
+
+  <script>
+    function toggleMenu() {
+      document.getElementById('hamburger').classList.toggle('open');
+      document.getElementById('navLinks').classList.toggle('open');
+    }
+    function closeMenu() {
+      document.getElementById('hamburger').classList.remove('open');
+      document.getElementById('navLinks').classList.remove('open');
+    }
+
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    let mx = -100, my = -100, rx = -100, ry = -100;
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+    });
+    function animRing() {
+      rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+      ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+      requestAnimationFrame(animRing);
+    }
+    animRing();
+    document.querySelectorAll('a, button').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+    });
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), i * 60);
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
